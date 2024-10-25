@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>uolevi232</title>
+  </head>
+  <body>
+    <div>
+      <canvas id="canvas" width="400" height="400" />
+    </div>
+    <script>
+const body = document.getElementsByTagName('body')[0]
+    body.style.background = "black"
+    const w = 400, h=400
+    function p(x, y, xs, ys,c ) {
+        return { x, y, xs, ys, c}
+    }
+    function randInt(min, max) {
+        return min + Math.floor(Math.random() * max);
+    }
+    const colors = ["red", "green", "blue", "white", "yellow", "orange", "cyan", "pink"];
+    const re = (elems) => elems[Math.floor(Math.random() * elems.length)]
+    const r = () => Math.random();
+    const ri = randInt;
+    const rp = () => p(ri(0, w), ri(0, h), r() * 3, r() * 3, re(colors))
+    const state = { ts: 0 };
+
+    function genpoints() {
+        state.points =
+        [rp(), rp(), rp(), rp(), rp(), rp()];
+    }
+
+    const ctx = document.getElementById('canvas').getContext('2d');
+    document.getElementById('canvas').addEventListener('click', (e) => {
+        e.preventDefault();
+        genpoints();
+
+    });
+    genpoints();
+
+    function draw(ts) {
+        const td = ts - state.ts;
+
+        if (td > 10) {
+            state.ts = ts;
+            // we should draw
+
+            // clear
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0, 0, 400, 400)
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = re(colors);
+            ctx.strokeText('conversation piece', ri(0, w), ri(0, h));
+            ctx.closePath();
+            ctx.stroke();
+
+
+            state.points = state.points.map((p) => {
+                if (p.x < 0) { p.xs = r() * 3; }
+                if (p.x > w) { p.xs = 0 - r() * 3; }
+                if (p.y < 0) { p.ys = r() * 3; }
+                if (p.y > w) { p.ys = 0 - r() * 3; }
+                p.x += p.xs; p.y += p.ys;
+                return p;
+            });
+
+            const points = state.points;
+            let p, np;
+            for (let i = 0; i < points.length - 1;i++){
+                p = points[i], np = points[i + 1];
+                ctx.beginPath();
+                ctx.strokeStyle = p.c;
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(np.x, np.y);
+                ctx.stroke();
+                ctx.closePath();
+            }
+            // draw last segment, last point to first
+            p = points[0];
+            ctx.beginPath();
+            ctx.strokeStyle = np.c;
+            ctx.moveTo(np.x, np.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // update latst ts, so that we'll eventually draw something
+        window.requestAnimationFrame(draw);
+    }
+    window.requestAnimationFrame(draw);
+  </script>
+</body>
+</html>
